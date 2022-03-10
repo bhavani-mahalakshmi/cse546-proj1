@@ -6,12 +6,18 @@ class S3:
     obj = None
     def __init__(self) -> None:
         try:
-            S3.obj = boto3.resource(
-                                        's3',
-                                        region_name='us-east-1',
-                                        aws_access_key_id=ACCESS_KEY_ID,
-                                        aws_secret_access_key=SECRET_ACCESS_KEY
-                                    )
+            if os.getenv("ENV") == "production":
+                S3.obj = boto3.resource(
+                                            's3',
+                                            region_name='us-east-1'
+                                        )
+            else:
+                S3.obj = boto3.resource(
+                                            's3',
+                                            region_name='us-east-1',
+                                            aws_access_key_id=ACCESS_KEY_ID,
+                                            aws_secret_access_key=SECRET_ACCESS_KEY
+                                        )                
         except NoCredentialsError:
             print("Credentials not available")
             return False
@@ -66,7 +72,7 @@ class ObjectStore:
         :param str result: result from the DL model
         """   
         key = file_name.split(".")[0]
-        return ObjectStore.s3.upload_result(OUTPUT_BUCKET, key+"key", result)
+        return ObjectStore.s3.upload_result(OUTPUT_BUCKET, key, result)
 
 def test():
     # ObjectStore.upload_input_images("/Users/bhavani/Desktop/sem2/cc-proj1/bhavani-app-tier/input-images/test.jpg")
