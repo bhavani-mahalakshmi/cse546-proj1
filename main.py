@@ -48,7 +48,9 @@ def process_image(image):
             ]
     output = json.dumps(output)
     print(output)
-    ObjectStore.upload_output_results(file_name, output)
+    key = file_name.split(".")[0]
+    value = classification[0]
+    ObjectStore.upload_output_results(key, value)
 
 def run_job():
   if Queue.get_num_messages_available(INPUT_QUEUE) > 0:

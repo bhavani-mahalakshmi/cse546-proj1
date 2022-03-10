@@ -7,12 +7,12 @@ class SQS:
     def __init__(self) -> None:
         try:
             if os.getenv("ENV") == "production":
-                SQS.obj = boto3.resource(
+                SQS.obj = boto3.client(
                                             'sqs',
                                             region_name='us-east-1'
                                         )
             else:
-                SQS.obj = boto3.resource(
+                SQS.obj = boto3.client(
                                             'sqs',
                                             region_name='us-east-1',
                                             aws_access_key_id=ACCESS_KEY_ID,
