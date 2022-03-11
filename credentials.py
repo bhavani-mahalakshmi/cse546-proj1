@@ -1,4 +1,3 @@
-
 ACCESS_KEY_ID = "x"
 SECRET_ACCESS_KEY = "x+x/x"
 INPUT_BUCKET = "imageinputbucket"
