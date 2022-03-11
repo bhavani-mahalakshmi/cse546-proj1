@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from s3 import ObjectStore
 from face_recognition import face_match
 from sqs import Queue
-from credentials import INPUT_QUEUE
+from credentials import INPUT_QUEUE, OUTPUT_QUEUE
 
 try:
   run_cont =  bool(os.environ['RUN_CONTINUOUSLY'])
@@ -51,7 +51,8 @@ def process_image(image):
     key = file_name.split(".")[0]
     value = classification[0]
     ObjectStore.upload_output_results(key, value)
-
+    Queue.send_message(OUTPUT_QUEUE, key+":"+value)
+    
 def run_job():
   if Queue.get_num_messages_available(INPUT_QUEUE) > 0:
       try:
