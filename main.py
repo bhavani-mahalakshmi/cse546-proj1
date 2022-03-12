@@ -1,4 +1,4 @@
-import os, base64, boto3
+import os, base64
 import time, json, traceback
 from datetime import datetime, timezone
 from s3 import ObjectStore
@@ -18,14 +18,13 @@ def process_image(image):
     process it - store in local and classify
     output the answer to s3
     """
-    # file_name = "test.jpg"
-    # classification = "test"
-
-    file_name, image_string = image.split(";")
+    file_name = image["file_name"]
+    image_string = image["encoded_image"]
+    unique_id = image["unique_id"]
     temp_path = '/tmp/' + file_name
     with open(temp_path, "wb") as fh:
         fh.write(base64.b64decode(image_string))
-    
+
     #Run classificaiton on image
     classification = face_match(temp_path, 'data.pt')
 
@@ -50,15 +49,27 @@ def process_image(image):
     print(output)
     key = file_name.split(".")[0]
     value = classification[0]
+    
+    response_message = {
+      "unique_id": unique_id,
+      "classification": value
+    }
+    response_message = json.dumps(response_message)
+    Queue.send_message(OUTPUT_QUEUE, response_message)
+
+    ObjectStore.upload_input_images(temp_path)
+    print("Input image file uploaded to s3")
+
     ObjectStore.upload_output_results(key, value)
-    Queue.send_message(OUTPUT_QUEUE, key+":"+value)
+    print("Output stored in s3")
     
 def run_job():
   if Queue.get_num_messages_available(INPUT_QUEUE) > 0:
       try:
         print("Retrieving Image from SQS")
-        image, receipt_handle = Queue.get_latest_message(INPUT_QUEUE)
-        process_image(image)
+        image_request, receipt_handle = Queue.get_latest_message(INPUT_QUEUE)
+        image_request = json.loads(image_request)
+        process_image(image_request)
         Queue.delete_message(INPUT_QUEUE, receipt_handle)
       except Exception:
         print("Error reading message")
@@ -66,19 +77,20 @@ def run_job():
         time.sleep(2)
   else:
     print("No more messages in queue")
-    if os.getenv("ENV") == "production" and not run_cont:
+    if not run_cont:
       import requests
       r = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
       instance_id = r.text
       print("Stopping instance ", instance_id)
-      boto3.client('ec2').stop_instances(
-              InstanceIds=[
-                  instance_id
-              ],
-              Hibernate=True|False,
-              DryRun=True|False,
-              Force=True|False
-          )
+      # os.system('sudo shutdown now -h')
+      # boto3.client('ec2').stop_instances(
+      #         InstanceIds=[
+      #             instance_id
+      #         ],
+      #         Hibernate=True|False,
+      #         DryRun=True|False,
+      #         Force=True|False
+      #     )
 
 while True:
     run_job()

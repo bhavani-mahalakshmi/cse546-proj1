@@ -6,18 +6,12 @@ class SQS:
     obj = None
     def __init__(self) -> None:
         try:
-            if os.getenv("ENV") == "production":
-                SQS.obj = boto3.client(
-                                            'sqs',
-                                            region_name='us-east-1'
-                                        )
-            else:
-                SQS.obj = boto3.client(
-                                            'sqs',
-                                            region_name='us-east-1',
-                                            aws_access_key_id=ACCESS_KEY_ID,
-                                            aws_secret_access_key=SECRET_ACCESS_KEY
-                                        )                
+            SQS.obj = boto3.client(
+                                        'sqs',
+                                        region_name='us-east-1',
+                                        aws_access_key_id=ACCESS_KEY_ID,
+                                        aws_secret_access_key=SECRET_ACCESS_KEY
+                                    )                
         except NoCredentialsError:
             print("Credentials not available")
             return False

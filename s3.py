@@ -6,18 +6,12 @@ class S3:
     obj = None
     def __init__(self) -> None:
         try:
-            if os.getenv("ENV") == "production":
-                S3.obj = boto3.resource(
-                                            's3',
-                                            region_name='us-east-1'
-                                        )
-            else:
-                S3.obj = boto3.resource(
-                                            's3',
-                                            region_name='us-east-1',
-                                            aws_access_key_id=ACCESS_KEY_ID,
-                                            aws_secret_access_key=SECRET_ACCESS_KEY
-                                        )                
+            S3.obj = boto3.resource(
+                                        's3',
+                                        region_name='us-east-1',
+                                        aws_access_key_id=ACCESS_KEY_ID,
+                                        aws_secret_access_key=SECRET_ACCESS_KEY
+                                    )                
         except NoCredentialsError:
             print("Credentials not available")
             return False
