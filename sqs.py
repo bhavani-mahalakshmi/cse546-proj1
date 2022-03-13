@@ -1,6 +1,5 @@
 import boto3, os
 from botocore.exceptions import NoCredentialsError
-from credentials import ACCESS_KEY_ID, SECRET_ACCESS_KEY
 
 class SQS:
     obj = None
@@ -8,10 +7,7 @@ class SQS:
         try:
             SQS.obj = boto3.client(
                                         'sqs',
-                                        region_name='us-east-1',
-                                        aws_access_key_id=ACCESS_KEY_ID,
-                                        aws_secret_access_key=SECRET_ACCESS_KEY
-                                    )                
+                                        region_name='us-east-1')
         except NoCredentialsError:
             print("Credentials not available")
             return False
