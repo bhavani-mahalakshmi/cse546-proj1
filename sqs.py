@@ -22,8 +22,8 @@ class SQS:
     def get_queue_by_name(self, name):
         return SQS.obj.get_queue_by_name(QueueName=name)
 
-    def send_message(self, queue_url, message):
-        SQS.obj.send_message(QueueUrl=queue_url,MessageBody=message, MessageGroupId='messageGroup1')
+    def send_message(self, queue_url, message, identifier):
+        SQS.obj.send_message(QueueUrl=queue_url,MessageBody=message, MessageGroupId=identifier)
 
     def get_queue_attributes(self, queue_url, attributes):
         return SQS.obj.get_queue_attributes(QueueUrl=queue_url,AttributeNames=attributes)
@@ -83,8 +83,8 @@ class Queue:
         Queue.sqs.delete_message(queue_url, receipt_handle)
 
     @staticmethod
-    def send_message(queue_url, message):
-        Queue.sqs.send_message(queue_url, message)
+    def send_message(queue_url, message, identifier):
+        Queue.sqs.send_message(queue_url, message, identifier)
 
 
 # def test():
