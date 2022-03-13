@@ -1,5 +1,5 @@
-ACCESS_KEY_ID = "x"
-SECRET_ACCESS_KEY = "x+x/x"
+ACCESS_KEY_ID = "AKIAQYCAYKE3NSLD5LEF"
+SECRET_ACCESS_KEY = "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"
 INPUT_BUCKET = "imageinputbucket"
 OUTPUT_BUCKET = "imageoutputbucket"
 INPUT_QUEUE = "https://sqs.us-east-1.amazonaws.com/051675418934/Input-Image-Queue.fifo"
