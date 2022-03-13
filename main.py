@@ -28,25 +28,7 @@ def process_image(image):
     #Run classificaiton on image
     classification = face_match(temp_path, 'data.pt')
 
-    # Delete file
-    os.remove(temp_path)
-
-    output = [
-                {
-                    'Key': 'Image',
-                    'Value': file_name
-                },
-                {
-                    'Key': 'Classification',
-                    'Value': classification
-                },
-                {
-                    'Key': 'ClassifiedOn',
-                    'Value': str(datetime.now(timezone.utc))
-                }                               
-            ]
-    output = json.dumps(output)
-    print(output)
+    print("Done: ", file_name, classification)
     key = file_name.split(".")[0]
     value = classification[0]
     
@@ -55,7 +37,8 @@ def process_image(image):
       "classification": value
     }
     response_message = json.dumps(response_message)
-    Queue.send_message(OUTPUT_QUEUE, response_message)
+    Queue.send_message(OUTPUT_QUEUE, response_message, unique_id)
+    print("Result sent to output queue")
 
     ObjectStore.upload_input_images(temp_path)
     print("Input image file uploaded to s3")
@@ -63,6 +46,9 @@ def process_image(image):
     ObjectStore.upload_output_results(key, value)
     print("Output stored in s3")
     
+    # Delete file
+    os.remove(temp_path)
+
 def run_job():
   if Queue.get_num_messages_available(INPUT_QUEUE) > 0:
       try:
@@ -74,7 +60,6 @@ def run_job():
       except Exception:
         print("Error reading message")
         traceback.print_exc()
-        time.sleep(2)
   else:
     print("No more messages in queue")
     if not run_cont:
@@ -82,7 +67,11 @@ def run_job():
       r = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
       instance_id = r.text
       print("Stopping instance ", instance_id)
-      # os.system('sudo shutdown now -h')
+      time.sleep(120)
+      if Queue.get_num_messages_available(INPUT_QUEUE) > 0:
+        return
+      else:
+        os.system('sudo shutdown now -h')
       # boto3.client('ec2').stop_instances(
       #         InstanceIds=[
       #             instance_id
@@ -94,4 +83,3 @@ def run_job():
 
 while True:
     run_job()
-    time.sleep(5) #poll every 5 seconds
