@@ -10,7 +10,11 @@ def create_instance():
         MinCount=1,
         MaxCount=1,
         InstanceType="t2.micro",
-        KeyName="AWS-EC2-SRIK"
+        KeyName="AWS-EC2-SRIK",
+        SecurityGroupIds=[ "sg-0a3a7315c499c0260" ],
+        IamInstanceProfile={
+            'Arn': 'arn:aws:iam::051675418934:instance-profile/app-tier-role'
+        }
     )
     print("Creating instance:", instances["Instances"][0]["InstanceId"])
 

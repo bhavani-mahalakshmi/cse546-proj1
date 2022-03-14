@@ -7,11 +7,12 @@ INPUT_QUEUE = "https://sqs.us-east-1.amazonaws.com/051675418934/Input-Image-Queu
 
 WEB_TIER = "i-0e9c8fcb5f467994f"
 
+client = boto3.client(
+                        'sqs',
+                        region_name='us-east-1'
+                    )
+
 def auto_scale_instances():
-    client = boto3.client(
-                            'sqs',
-                            region_name='us-east-1'
-                        )
 
     queue_length = int(client.get_queue_attributes(QueueUrl=INPUT_QUEUE,AttributeNames=['ApproximateNumberOfMessages']).get("Attributes").get("ApproximateNumberOfMessages"))
 
@@ -47,7 +48,8 @@ def auto_scale_instances():
             if length_of_stopped >= needed_instances:
                 ec2_instance_manager.bulk_start_instances(stopped_instances[:needed_instances])
             else:
-                for _ in range(needed_instances):
+                ec2_instance_manager.bulk_start_instances(stopped_instances)
+                for _ in range(needed_instances-length_of_stopped):
                     ec2_instance_manager.create_instance()
 
     elif 100 < queue_length <= 500:
@@ -61,7 +63,8 @@ def auto_scale_instances():
             if length_of_stopped >= needed_instances:
                 ec2_instance_manager.bulk_start_instances(stopped_instances[:needed_instances])
             else:
-                for _ in range(needed_instances):
+                ec2_instance_manager.bulk_start_instances(stopped_instances)
+                for _ in range(needed_instances-length_of_stopped):
                     ec2_instance_manager.create_instance()
 
     else:
@@ -75,36 +78,9 @@ def auto_scale_instances():
             if length_of_stopped >= needed_instances:
                 ec2_instance_manager.bulk_start_instances(stopped_instances[:needed_instances])
             else:
-                for _ in range(needed_instances):
+                ec2_instance_manager.bulk_start_instances(stopped_instances)
+                for _ in range(needed_instances-length_of_stopped):
                     ec2_instance_manager.create_instance()
-
-        # running_instances = ec2_instance_manager.get_running_instances()
-        # running_instances.remove(WEB_TIER)
-        # num_of_running_instances = len(running_instances)
-        # if num_of_running_instances == 19:
-        #     print("Maximum capacity reached")
-        #     return
-
-        # if num_of_running_instances == 0:
-            
-        
-        # if num_of_running_instances < queue_length:
-        #     stopped_instances = ec2_instance_manager.get_stopped_instances()
-        #     num_of_available_instances = len(stopped_instances)
-
-        #     to_start = num_of_available_instances - queue_length
-        #     if to_start > 0:
-        #         instances_to_start = stopped_instances[:to_start]
-        #     if to_start < 0:
-        #         instances_to_start = stopped_instances
-        #     ec2_instance_manager.bulk_start_instances(instances_to_start)
-        # else:
-        #     #scale down
-        #     #web tier
-        #     # running_instances.remove(WEB_TIER)
-        #     # to_stop = len(running_instances) - queue_length
-        #     # ec2_instance_manager.bulk_stop_instances(running_instances[:to_stop])
-        #     pass
 
 while True:
     print("Starting Auto Scaling")
