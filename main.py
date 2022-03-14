@@ -62,24 +62,15 @@ def run_job():
         traceback.print_exc()
   else:
     print("No more messages in queue")
-    if not run_cont:
-      import requests
-      r = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
-      instance_id = r.text
-      print("Stopping instance ", instance_id)
-      time.sleep(120)
-      if Queue.get_num_messages_available(INPUT_QUEUE) > 0:
-        return
-      else:
-        os.system('sudo shutdown now -h')
-      # boto3.client('ec2').stop_instances(
-      #         InstanceIds=[
-      #             instance_id
-      #         ],
-      #         Hibernate=True|False,
-      #         DryRun=True|False,
-      #         Force=True|False
-      #     )
+    import requests
+    r = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
+    instance_id = r.text
+    print("Stopping instance ", instance_id)
+    time.sleep(120)
+    if Queue.get_num_messages_available(INPUT_QUEUE) > 0:
+      return
+    else:
+      os.system('sudo shutdown now -h')
 
 while True:
     run_job()
