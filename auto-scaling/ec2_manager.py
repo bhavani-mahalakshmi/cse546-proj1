@@ -2,7 +2,10 @@ import boto3
 
 ec2_client = boto3.client('ec2',region_name='us-east-1')
 
-AMI_ID = "ami-0ed1a0b25a81a7f86"
+AMI_ID = "ami-0f87d4e6d07287e28"
+ROLE_ARN = "arn:aws:iam::378107157540:instance-profile/sqs-s3-ec2-full-access"
+SECURITY_GROUP = "sg-0dc6c0eb5cc4d9d27"
+KEY_NAME = "Private_Key"
 
 def create_instance():
     instances = ec2_client.run_instances(
@@ -10,10 +13,10 @@ def create_instance():
         MinCount=1,
         MaxCount=1,
         InstanceType="t2.micro",
-        KeyName="AWS-EC2-SRIK",
-        SecurityGroupIds=[ "sg-0a3a7315c499c0260" ],
+        KeyName=KEY_NAME,
+        SecurityGroupIds=[ SECURITY_GROUP ],
         IamInstanceProfile={
-            'Arn': 'arn:aws:iam::051675418934:instance-profile/app-tier-role'
+            'Arn': ROLE_ARN
         }
     )
     print("Creating instance:", instances["Instances"][0]["InstanceId"])

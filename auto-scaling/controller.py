@@ -1,11 +1,10 @@
-import queue
 import ec2_manager as ec2_instance_manager
 import time
 import boto3
 
-INPUT_QUEUE = "https://sqs.us-east-1.amazonaws.com/051675418934/Input-Image-Queue.fifo"
+INPUT_QUEUE = "https://sqs.us-east-1.amazonaws.com/378107157540/Request-Queue.fifo"
 
-WEB_TIER = "i-0e9c8fcb5f467994f"
+WEB_TIER = "i-0d1247d2963d81ff8"
 
 client = boto3.client(
                         'sqs',
