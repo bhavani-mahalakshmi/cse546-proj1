@@ -19,46 +19,29 @@ def auto_scale_instances():
 
     # band_dict = {0: 0, 20: 1, 100: 2, 500: 5, 1000: 19}
 
+    running_instances = ec2_instance_manager.get_running_instances()
+    stopped_instances = ec2_instance_manager.get_stopped_instances()
+    running_instances.remove(WEB_TIER)
+
     if queue_length == 0:
-        all_instances = ec2_instance_manager.get_running_instances()
-        all_instances.remove(WEB_TIER)
-        print("Queue is empty, shutting down all instances (downscaling)")
-        ec2_instance_manager.bulk_stop_instances(all_instances)
+        # all_instances = ec2_instance_manager.get_running_instances()
+        # all_instances.remove(WEB_TIER)
+        # print("Queue is empty, shutting down all instances (downscaling)")
+        # ec2_instance_manager.bulk_stop_instances(all_instances)
         return
 
-    elif 1 <= queue_length <= 20:
-        running_instances = ec2_instance_manager.get_running_instances()
-        stopped_instances = ec2_instance_manager.get_stopped_instances()
-        running_instances.remove(WEB_TIER)
+    elif 1 <= queue_length <= 5:
         if len(running_instances) == 0:
             if len(stopped_instances) >= 1:
                 ec2_instance_manager.start_instance(stopped_instances[0])
             else:
                 ec2_instance_manager.create_instance()
 
-    elif 20 < queue_length <= 100:
-        running_instances = ec2_instance_manager.get_running_instances()
-        stopped_instances = ec2_instance_manager.get_stopped_instances()
-        running_instances.remove(WEB_TIER)
-        if len(running_instances) < 2:
+    elif 5 < queue_length <= 50:
+        if len(running_instances) < 10:
             length_of_running = len(running_instances)
             length_of_stopped = len(stopped_instances)
-            needed_instances = 2 - length_of_running
-            if length_of_stopped >= needed_instances:
-                ec2_instance_manager.bulk_start_instances(stopped_instances[:needed_instances])
-            else:
-                ec2_instance_manager.bulk_start_instances(stopped_instances)
-                for _ in range(needed_instances-length_of_stopped):
-                    ec2_instance_manager.create_instance()
-
-    elif 100 < queue_length <= 500:
-        running_instances = ec2_instance_manager.get_running_instances()
-        stopped_instances = ec2_instance_manager.get_stopped_instances()
-        running_instances.remove(WEB_TIER)
-        if len(running_instances) < 5:
-            length_of_running = len(running_instances)
-            length_of_stopped = len(stopped_instances)
-            needed_instances = 5 - length_of_running
+            needed_instances = 10 - length_of_running
             if length_of_stopped >= needed_instances:
                 ec2_instance_manager.bulk_start_instances(stopped_instances[:needed_instances])
             else:
@@ -67,9 +50,6 @@ def auto_scale_instances():
                     ec2_instance_manager.create_instance()
 
     else:
-        running_instances = ec2_instance_manager.get_running_instances()
-        stopped_instances = ec2_instance_manager.get_stopped_instances()
-        running_instances.remove(WEB_TIER)
         if len(running_instances) < 19:
             length_of_running = len(running_instances)
             length_of_stopped = len(stopped_instances)
@@ -84,4 +64,4 @@ def auto_scale_instances():
 while True:
     print("Starting Auto Scaling")
     auto_scale_instances()
-    time.sleep(30)
+    time.sleep(5)
