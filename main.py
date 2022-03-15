@@ -37,7 +37,7 @@ def process_image(image):
       "classification": value
     }
     response_message = json.dumps(response_message)
-    Queue.send_message(OUTPUT_QUEUE, response_message, unique_id)
+    Queue.send_message(OUTPUT_QUEUE, response_message)
     print("Result sent to output queue")
 
     ObjectStore.upload_input_images(temp_path)
